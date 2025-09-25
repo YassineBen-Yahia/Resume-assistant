@@ -1,5 +1,5 @@
 import re
-
+import random
 def standardize_data(parsed_data: dict) -> dict:
     def clean_text(text):
         text = text.strip()
@@ -98,9 +98,27 @@ def missing_skills(job_skills, candidate_skills):
     """
     Returns a list of skills that are in job_skills but not in candidate_skills.
     """
+    
     if not job_skills:
         return []
     if not candidate_skills:
         return job_skills
     missing = set(job_skills) - set(candidate_skills)
     return list(missing)        
+
+def generate_advice_for_missing_skills(missing_skills):
+    """
+    Generates advice for missing skills.
+    """
+    if not missing_skills:
+        return "You have all the required skills for this job."
+    #missing_skills.shuffle()
+    advice = "To improve your chances for this job, consider acquiring the following skills: "
+    advice += ", ".join(missing_skills)
+    advice += ". You can take online courses, attend workshops, or gain practical experience in these areas."
+    advice += " Additionally, highlight any related skills or experiences you have that may be relevant."
+    i= random.random()
+    if i>0.5:
+        advice += " Consider working on personal projects to demonstrate your skills then add them to your portfolio or resume."
+    return advice
+
