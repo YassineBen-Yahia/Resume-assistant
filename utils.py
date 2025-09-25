@@ -122,3 +122,16 @@ def generate_advice_for_missing_skills(missing_skills):
         advice += " Consider working on personal projects to demonstrate your skills then add them to your portfolio or resume."
     return advice
 
+def experience_advice(job_experience, candidate_experience):
+    """
+    Generates advice based on experience comparison.
+    """
+    if not job_experience:
+        return "Experience is not a requirement for this job."
+    if candidate_experience >= job_experience:
+        return "You meet the experience requirement for this job."
+    else:
+        diff = job_experience - candidate_experience
+        advice = f"You are {diff} years short of the required experience. Consider gaining more experience through relevant roles, projects, or further education."
+        advice += " Highlight any transferable skills or related experiences you have that may compensate for the gap."
+        return advice
