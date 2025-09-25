@@ -1,0 +1,188 @@
+# Import all required libraries
+from transformers import AutoTokenizer
+from transformers import AutoModelForTokenClassification
+from transformers import AutoModel
+import torch
+import spacy
+import spacy_transformers  # Explicitly import spacy_transformers
+from pathlib import Path
+import re
+import os
+from utils import standardize_data
+from utils import sum_experience_years
+from fit_calc import total_match_score
+
+def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_text):
+
+    # 1. Preprocess the input text
+    cleaned_text = re.sub(r'[^\x00-\x7F]+', '', resume_text)
+    resume_text = cleaned_text.replace('\n',' ').replace('\r','')
+    resume_text = re.sub('\s+',' ',resume_text).strip()
+
+    #dictionary to hold the extracted entities
+    #1. Extract entities from resume using spaCy NER model
+    L = {}
+    doc = nlp(resume_text)
+    for ent in doc.ents:
+        if ent.label_ !='Skills':
+            L[ent.label_] = L.get(ent.label_, []) + [ent.text]
+        else:
+            skills = ent.text.split(':')
+            for i in range(len(skills)):
+                skills2 = skills[i].split(',')
+                for i in range(len(skills2)):
+                    skills2[i] = skills2[i].strip()
+                    if len(skills2[i]) < 30:
+                        L['Skills'] = L.get('Skills', []) + [skills2[i]]
+
+    # Use Hugging Face transformers NER model to extract email and skills
+    # 1. Tokenize input text  
+    inputs = tokenizer(
+        resume_text,
+        return_tensors="pt",
+        truncation=True,
+        is_split_into_words=False
+    )
+
+    # 2. Forward pass
+    with torch.no_grad():
+        outputs = ner_resume(**inputs)          # outputs.logits shape: [batch, seq_len, num_labels]
+
+    # 3. Take the most probable label for each token
+    pred_ids = torch.argmax(outputs.logits, dim=2)[0]    # shape: [seq_len]
+
+    # 4. Convert back to words + labels
+    tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
+    labels = [ner_resume.config.id2label[id_.item()] for id_ in pred_ids]
+
+
+
+    j=-1
+    for i, (token, label) in enumerate(zip(tokens, labels)):
+        if(j>i):
+            continue
+        if label != "O":
+            # Start a span with the current token
+            span = token
+            j = i + 1
+            while j < len(labels) and labels[j] == label:# Check consecutive tokens with the same label
+                span +=" "
+                span += tokenizer.convert_tokens_to_string([tokens[j]])# Concatenate subsequent tokens with the same label
+                j += 1
+
+
+    #regex patterns to extract email and skills
+    email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+    skills_pattern=r"\b(Python|Java|C\+\+|C#|JavaScript|TypeScript|Go|Rust|Ruby|PHP|Swift|Kotlin|R|MATLAB|SQL|NoSQL|MongoDB|PostgreSQL|MySQL|HTML|CSS|React|Angular|Vue|Django|Flask|Spring|Node\.js|Express|TensorFlow|PyTorch|Keras|Scikit-learn|Pandas|NumPy|Docker|Kubernetes|Git|AWS|Azure|GCP|Linux|Unix|Bash|Shell)\b"
+    experience_pattern=r"(\d+)\s+(years|year)"
+    degree_pattern = r"""
+    \b(
+        # Common abbreviated forms
+        (?:B.S.\s\.?\s?[A-Z][a-zA-Z]*|M\.?\s?[A-Z][a-zA-Z]*|Ph\.?D\.?|MBA|LL\.?B\.?|LL\.?M\.?) |
+        
+        # Bachelor's, Master's, Doctorate, Associate's
+        (?:Bachelor(?:’s|\'s)?\s(?:degree\s)?(?:in\s[\w\s,&/()-]+(?:\s(?:or|and)\s[\w\s,&/()-]+)*)?) |
+        (?:Master(?:’s|\'s)?\s(?:degree\s)?(?:in\s[\w\s,&/()-]+(?:\s(?:or|and)\s[\w\s,&/()-]+)*)?) |
+        (?:Doctor(?:ate| of Philosophy| of [\w\s,&/()-]+)) |
+        (?:Associate(?:’s|\'s)?\s(?:degree\s)?(?:in\s[\w\s,&/()-]+(?:\s(?:or|and)\s[\w\s,&/()-]+)*)?) |
+        
+        # Diploma or Certification programs
+        (?:Diploma\s(?:in\s[\w\s,&/()-]+)?) |
+        (?:Certificate\s(?:in\s[\w\s,&/()-]+)?) |
+        
+        # Generic Degree + field
+        (?:Degree\s(?:in\s[\w\s,&/()-]+)?)
+    )\b
+    """
+    skills = re.findall(skills_pattern, resume_text)
+    #print(f"Skills found: {skills}")
+    emails = re.findall(email_pattern, resume_text)
+    if emails:
+        L['Email Address'] = L.get('EMAIL', []) + emails
+    if skills:
+        L['Skills'] = L.get('Skills', []) + skills   
+
+    d_pattern = re.compile(degree_pattern, re.IGNORECASE | re.VERBOSE) 
+
+    for key in L:
+        L[key] = list(set(L[key]))  # Remove duplicates
+
+    inputs = jobtokenize(
+        job_text,
+        return_tensors="pt",
+        truncation=True,
+        is_split_into_words=False
+    )
+
+    # 2. Forward pass
+    with torch.no_grad():
+        outputs = ner_job(**inputs)          # outputs.logits shape: [batch, seq_len, num_labels]
+
+    # 3. Take the most probable label for each token
+    pred_ids = torch.argmax(outputs.logits, dim=2)[0]    # shape: [seq_len]
+
+    # 4. Convert back to words + labels
+    tokens = jobtokenize.convert_ids_to_tokens(inputs["input_ids"][0])
+    labels = [ner_job.config.id2label[id_.item()] for id_ in pred_ids]
+
+    J={}
+
+    j=-1
+    for i, (token, label) in enumerate(zip(tokens, labels)):
+        if(j>i):
+            continue
+        if label != "O":
+            # Start a span with the current token
+            span = token
+            j = i + 1
+            while j < len(labels) and labels[j][2:] == label[2:]:# Check consecutive tokens with the same label
+                span +=" "
+                span += jobtokenize.convert_tokens_to_string([tokens[j]])# Concatenate subsequent tokens with the same label
+                j += 1
+            if label !='DATE':
+                J[label[2:]] = J.get(label[2:], []) + [span]
+    jobskills = re.findall(skills_pattern, job_text)
+    Job={}
+    if jobskills:
+        Job['Skills'] = Job.get('Skills', []) + jobskills
+    if 'SKILL' in J:
+        for skill in J['SKILL']:
+            if skill not in Job['Skills']:
+                if skill[0]=='▁':
+                    skill=skill[1:]
+                Job['Skills'] = Job.get('Skills', []) + [skill]
+    degrees= re.findall(d_pattern, job_text)
+
+    for d in degrees:
+        if "degree" in d.lower() or "bachelor" in d.lower() or "master" in d.lower() or "doctor" in d.lower() or "associate" in d.lower() or "diploma" in d.lower() or "certificate" in d.lower():
+            if len(d)>60:
+                Job['Degree'] = Job.get('Degree', []) + [d[:60]]
+            else:
+                Job['Degree'] = Job.get('Degree', []) + [d]
+
+
+    if 'EDUCATION' in J:
+        for skill in J['EDUCATION']:
+            if skill not in Job['Degree']:
+                if skill[0]=='▁':
+                    skill=skill[1:]
+                Job['Degree'] = Job.get('Degree', []) + [skill]
+
+    experience = re.findall(experience_pattern, job_text)
+    if experience:
+        for exp in experience:
+            if int(exp[0]) < 50:  # Filter out unrealistic experience values
+                Job['ExperianceYears'] = Job.get('ExperianceYears', []) + [f"{exp[0]} {exp[1]}"]  
+    Job=standardize_data(Job)
+    L=standardize_data(L)
+    print(f"Total Match Score: {total_match_score(Job, L)}")
+    for key in Job:
+        print(f"{key}: {Job[key]}")
+
+    print()
+    print("********************************")
+    print()
+    for key in L:
+        print(f"{key}: {L[key]}")
+
+
