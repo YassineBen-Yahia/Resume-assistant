@@ -1,7 +1,7 @@
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from utils import expand_degree_abbreviations
+from utils import expand_degree_abbreviations , sum_experience_years
 
 
 def semantic_similarity(list1, list2):
@@ -47,16 +47,44 @@ def degree_match_score(job_degree, candidate_degree):
     elif semantic_similarity_score > 0.5:
         return 0.5 + 0.5 * semantic_similarity_score
     else:
-        return semantic_similarity_score 
+        # Return the percentage of similar words between job_degree and candidate_degree
+        cw= " ".join(candidate_degree).lower().split()
+        jw= " ".join(job_degree).lower().split()
+        matched_words = set(cw).intersection(set(jw))
+        return len(matched_words) / max(len(set(jw)), 1)
 
 
+def experience_match_score(job_experience, candidate_experience):
+    """
+    Calculates the experience match score between job experience and candidate experience.
+    Returns a float between 0 and 1.
+    """
+    
+    if not job_experience :
+        return 1.0
+    if not candidate_experience:
+        return 0.5
+    if candidate_experience >= job_experience:
+        return 1.0
+    else:
+        return candidate_experience / job_experience
 
+def total_match_score(job, candidate):
+    """
+    Calculates the total match score between job and candidate.
+    Weights: skills 50%, degree 30%, experience 20%
+    """
+    skill_score = skill_match_score(job.get("Skills", []), candidate.get("Skills", []))
+    degree_score = degree_match_score(job.get("Degree", []), candidate.get("Degree", []))
+    cey=candidate.get("ExperianceYears", 0)
+    cey=cey[0] if isinstance(cey, list) and len(cey) > 0 else cey
+    jey=job.get("ExperianceYears", 0)
+    jey=jey[0] if isinstance(jey, list) and len(jey) > 0 else jey
+    experience_score = experience_match_score(jey, cey)
 
-
+    total_score = (0.5 * skill_score) + (0.25 * degree_score) + (0.25 * experience_score)
+    return total_score
 
 if __name__ == "__main__":
     # Example usage
-    job_degree = ["Bachelor's in Machine learning", "Master's in AI"]
-    candidate_degree = ["Master's' in Artificial Intelligence", "BSc in Computer Science"]
-    print("Degree Match Score:", degree_match_score(job_degree, candidate_degree))
-    print (expand_degree_abbreviations("BSc. in Computer Science, M.A. in Economics, Ph.D. in Physics"))
+    print(degree_match_score(['Bachelor', 'Engineering', 'Management', 'Science'],["Bachelor'S'. In Electronics & Communications Engineering"]))
