@@ -92,3 +92,15 @@ def expand_degree_abbreviations(text: str) -> str:
     for pattern, full in degree_map.items():
         new_text = re.sub(pattern, full, new_text, flags=re.IGNORECASE)
     return new_text
+
+
+def missing_skills(job_skills, candidate_skills):
+    """
+    Returns a list of skills that are in job_skills but not in candidate_skills.
+    """
+    if not job_skills:
+        return []
+    if not candidate_skills:
+        return job_skills
+    missing = set(job_skills) - set(candidate_skills)
+    return list(missing)        
