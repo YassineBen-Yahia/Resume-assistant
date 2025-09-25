@@ -66,3 +66,29 @@ def sum_experience_years(experience_list):
             total += int(parts[0])
     return total
 
+degree_map = {
+    r"\bB\.?S\.?\b": "Bachelor's'",
+    r"\bB\.?Sc\.?\b": "Bachelor's'",
+    r"\bB\.?A\.?\b": "Bachelor of Arts",
+    r"\bM\.?S\.?\b": "Master's'",
+    r"\bMSc\b": "Master's'",
+    r"\bM\.?A\.?\b": "Master's'",
+    r"\bMBA\b": "Master of Business Administration",
+    r"\bPh\.?D\.?\b": "Doctor of Philosophy",
+    r"\bDBA\b": "Doctor of Business Administration",
+    r"\bAssoc\.?\b": "Associate Degree",
+    r"\bAI\b": "Artificial Intelligence",
+    r"\bML\b": "Machine Learning",
+    r"\bCS\b": "Computer Science",
+    r"\bE\.?E\.?\b": "Electrical Engineering",
+    r"\bComp\.?Sci\.?\b": "Computer Science",
+    r"\bEng\.?\b": "Engineering",
+    r"\bDL\b": "Deep Learning",
+}
+
+
+def expand_degree_abbreviations(text: str) -> str:
+    new_text = text
+    for pattern, full in degree_map.items():
+        new_text = re.sub(pattern, full, new_text, flags=re.IGNORECASE)
+    return new_text
