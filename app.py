@@ -1,18 +1,13 @@
-# Import all required libraries
-from transformers import AutoTokenizer
-from transformers import AutoModelForTokenClassification
-from transformers import AutoModel
-import torch
-import spacy
-import spacy_transformers  # Explicitly import spacy_transformers
-from pathlib import Path
+
 import re
-import os
-from utils import standardize_data
-from utils import sum_experience_years
+import torch
 from fit_calc import total_match_score
+from utils import standardize_data, sum_experience_years
+
+
 
 def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_text):
+
 
     # 1. Preprocess the input text
     cleaned_text = re.sub(r'[^\x00-\x7F]+', '', resume_text)
@@ -184,5 +179,7 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
     print()
     for key in L:
         print(f"{key}: {L[key]}")
+
+    return L, Job
 
 
