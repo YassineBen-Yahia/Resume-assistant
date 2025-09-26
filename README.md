@@ -127,28 +127,17 @@ The system extracts the following entities:
 -  **Experience**: Required years of experience
 
 
-##  Features in Detail
-
-### Fit Score Calculation
-- **Skills Matching**: Exact matches + semantic similarity using TF-IDF
-- **Education Matching**: Degree level and field alignment
-- **Experience Matching**: Years of experience comparison with scaling
-
-### Data Processing Pipeline
-1. **Text Cleaning**: Remove non-ASCII characters, normalize whitespace
-2. **Entity Recognition**: Multi-model NER for comprehensive extraction
-3. **Score Calculation**: Weighted algorithm for match percentage
-
 
 ##  Future Enhancements
 
-### Planned Features
-- [ ] **Multi-language Support**: Support for resumes in different languages
-- [ ] **ATS Optimization**: Resume formatting suggestions for ATS systems
-
 ### Potential Improvements
-- [ ] **Performance Optimization**: Faster processing for large documents
-- [ ] **Cloud Deployment**: Scalable cloud infrastructure
+- [ ] **Mapping related skills**: For exapmle map "Deep Learning" --> "PyTorch" or "Tensorflow"
+- [ ] **Add a LLM layer**: More accurate chatbot
+
+
+## Some Problems
+
+The pipeline I designed doesn't always get an accurate score for example when the skills required are "Python" "Pandas" or "XGBoost experience" but the resume just mentions "Machine learning skills" it gives a low score even with semantic similarities.  
 
 
 
