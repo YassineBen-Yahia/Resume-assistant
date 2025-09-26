@@ -534,7 +534,32 @@
 
         let resumeData = null;
         let resumeText = null;
+        let jobData = null;
+        let advice=null;
 
+        async function getAdvice(){
+             try {
+                const response = await fetch('/generate_advice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job: jobData,
+                        resume_data: resumeData,
+                        
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    advice = data.advice;
+                }
+            } catch (error) {
+                addMessage("Error fetching advice:", 'assistant');
+            }
+        }
+        
         function generateResponse(userMessage) {
             const lowerMessage = userMessage.toLowerCase();
             
@@ -542,30 +567,32 @@
                 addMessage("Please upload your resume first so I can analyze it and provide personalized insights.", 'assistant');
                 return;
             }
-
+            
             // Check if user is pasting a job description
             if (userMessage.length > 200 && (lowerMessage.includes('job') || lowerMessage.includes('position') || lowerMessage.includes('role') || lowerMessage.includes('requirements') || lowerMessage.includes('responsibilities'))) {
                 analyzeJobMatch(userMessage);
                 return;
             }
-
+            
             // Handle other queries
             let response = '';
-            if (lowerMessage.includes('skills') || lowerMessage.includes('skill')) {
+            if (lowerMessage.includes('improve') || lowerMessage.includes('suggestion')) {
+               if (advice) {
+                    response = `Here are some suggestions to improve your resume:\n${advice}`;
+                } else {
+                    response = "I can provide suggestions to improve your resume. Please upload your resume and ask for suggestions!";
+                }           
+            } else if (lowerMessage.includes('skills') || lowerMessage.includes('skill')) {
                 if (resumeData && resumeData.Skills) {
                     response = `Based on your resume, I found ${resumeData.Skills.length} skills: ${resumeData.Skills.slice(0, 10).join(', ')}${resumeData.Skills.length > 10 ? '...' : ''}. Would you like suggestions to improve your skills section?`;
                 } else {
                     response = "I can analyze your technical and soft skills. Upload your resume and I'll provide detailed insights!";
                 }
-            } else if (lowerMessage.includes('improve') || lowerMessage.includes('suggestion')) {
-                response = "I can help improve your resume! Try pasting a job description here, and I'll analyze how well your background matches and suggest specific improvements.";
-            } else if (lowerMessage.includes('job') || lowerMessage.includes('match') || lowerMessage.includes('position')) {
-                response = "Perfect! Paste a job description or job posting here, and I'll calculate your fit score and provide detailed analysis of how well you match the requirements.";
             } else if (lowerMessage.includes('experience') || lowerMessage.includes('work')) {
                 if (resumeData && resumeData.ExperianceYears) {
                     response = `I see you have ${resumeData.ExperianceYears[0]} of experience. I can help you better showcase your achievements and quantify your impact. What specific aspect would you like to improve?`;
                 } else {
-                    response = "I can analyze your work experience section. Upload your resume first for personalized suggestions!";
+                    response = "You didn't mention your experience in your resume!";
                 }
             } else {
                 response = "I'm your AI resume assistant! I can:\n• 📊 Calculate job fit scores\n• 🔍 Analyze your skills and experience\n• 💡 Suggest improvements\n• 🎯 Match you with job descriptions\n\nTry pasting a job description to see how well you match!";
@@ -574,13 +601,13 @@
             addMessage(response, 'assistant');
         }
 
-            
-
+        
+        
         async function analyzeJobMatch(jobDescription) {
             
-
+            
             addMessage("🔄 Analyzing job match... This may take a moment.", 'assistant');
-
+            
             try {
                 const response = await fetch('/analyze_job_and_resume', {
                     method: 'POST',
@@ -593,13 +620,15 @@
                         
                     })
                 });
-
+                
                 const result = await response.json();
                 resumeData = result.resume_data;
+                jobData = result.job_requirements;
                 
                 
                 if (result.success) {
                     displayJobAnalysis(result);
+                    getAdvice();
                 } else {
                     addMessage(`❌ Error ici: ${result.error || 'Unknown error'}\nStatus: ${response.status}\n${result.stack || ''}`, 'assistant');
                 }

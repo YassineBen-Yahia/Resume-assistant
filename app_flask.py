@@ -8,7 +8,7 @@ import re
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from fit_calc import total_match_score
-from utils import standardize_data, sum_experience_years, generate_resume_summary, generate_job_analysis, extract_text_from_pdf
+from utils import standardize_data, sum_experience_years, missing_skills, generate_job_analysis, extract_text_from_pdf, generate_advice_for_missing_skills
 from Process_data import process
 import traceback
 
@@ -247,6 +247,32 @@ def analyze_job_and_resume():
         traceback.print_exc()
         return jsonify({'error': f'Error analyzing job: {str(e)}{e.__traceback__}'}), 500
 
+
+@app.route('/generate_advice', methods=['POST'])
+def generate_advice():
+    try:
+        data = request.json
+        job = data.get('job', [])
+        resume_data = data.get('resume_data', [])
+        
+        
+        if not job:
+            return jsonify({'error': 'No job skills provided'}), 400
+        job_skills = job.get('Skills', [])
+        
+        resumeSkills = resume_data.get('Skills', [])
+        
+        missing_skill = missing_skills(job_skills, resumeSkills)
+        advice = generate_advice_for_missing_skills(missing_skill)
+        return jsonify({
+            'success': True,
+            'advice': advice
+        })
+        
+    except Exception as e:
+        print("Error during job and resume analysis:", e.__traceback__)
+        traceback.print_exc()
+        return jsonify({'error': f'Error analyzing job: {str(e)}{e.__traceback__}'}), 500
 
 
 
