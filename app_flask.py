@@ -5,7 +5,7 @@ import re
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from fit_calc import total_match_score
-from utils import standardize_data, sum_experience_years, missing_skills, generate_job_analysis, extract_text_from_pdf, generate_advice_for_missing_skills
+from utils import standardize_data, generate_general_advice, generate_job_analysis, extract_text_from_pdf
 from Process_data import process
 import traceback
 
@@ -255,12 +255,8 @@ def generate_advice():
         
         if not job:
             return jsonify({'error': 'No job skills provided'}), 400
-        job_skills = job.get('Skills', [])
-        
-        resumeSkills = resume_data.get('Skills', [])
-        
-        missing_skill = missing_skills(job_skills, resumeSkills)
-        advice = generate_advice_for_missing_skills(missing_skill)
+       
+        advice = generate_general_advice(job, resume_data)
         return jsonify({
             'success': True,
             'advice': advice

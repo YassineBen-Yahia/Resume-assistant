@@ -116,6 +116,33 @@ def experience_advice(job_experience, candidate_experience):
         advice += " Highlight any transferable skills or related experiences you have that may compensate for the gap."
         return advice
     
+def generate_general_advice(job_requirements, resume_data):
+    """
+    Generates general advice based on job requirements and resume data.
+    """
+    advice = ""
+    
+    # Skills advice
+    missing = missing_skills(job_requirements.get('Skills', []), resume_data.get('Skills', []))
+    if missing:
+        advice+=generate_advice_for_missing_skills(missing)
+    
+    # Experience advice
+    job_exp = job_requirements.get('ExperianceYears', ['0 years'])[0]
+    resume_exp = resume_data.get('ExperianceYears', ['0 years'])[0]
+    
+    try:
+        job_years = sum_experience_years(job_exp)
+        if job_years==0:
+            pass
+        resume_years = sum_experience_years(resume_exp)
+        advice+=experience_advice(job_years, resume_years)
+    except:
+        pass
+
+    return advice
+
+
 
 def generate_resume_summary(entities):
     """Generate a summary of the extracted resume information"""
