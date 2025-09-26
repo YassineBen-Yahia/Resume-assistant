@@ -1,6 +1,9 @@
 import re
 import random
+from pathlib import Path
 import PyPDF2
+import fitz  # PyMuPDF
+
 
 def standardize_data(parsed_data: dict) -> dict:
     def clean_text(text):
@@ -69,8 +72,6 @@ def sum_experience_years(experience_list):
     return total
 
 
-
-
 def missing_skills(job_skills, candidate_skills):
     """
     Returns a list of skills that are in job_skills but not in candidate_skills.
@@ -82,6 +83,7 @@ def missing_skills(job_skills, candidate_skills):
         return job_skills
     missing = set(job_skills) - set(candidate_skills)
     return list(missing)        
+
 
 def generate_advice_for_missing_skills(missing_skills):
     """
@@ -98,6 +100,7 @@ def generate_advice_for_missing_skills(missing_skills):
     if i>0.5:
         advice += " Consider working on personal projects to demonstrate your skills then add them to your portfolio or resume."
     return advice
+
 
 def experience_advice(job_experience, candidate_experience):
     """
@@ -138,28 +141,19 @@ def generate_resume_summary(entities):
 
 
 
-
-
-
-
 def get_fit_grade(fit_score):
     """Convert fit score to letter grade"""
-    if fit_score >= 0.9:
-        return "A+"
-    elif fit_score >= 0.8:
-        return "A"
-    elif fit_score >= 0.7:
-        return "B+"
-    elif fit_score >= 0.6:
-        return "B"
+    
+    if fit_score >= 0.7:
+        return "Very good fit "
     elif fit_score >= 0.5:
-        return "C+"
+        return "Good fit "
     elif fit_score >= 0.4:
-        return "C"
-    elif fit_score >= 0.3:
-        return "D"
-    else:
-        return "F"
+        return "fair fit "
+
+    elif fit_score < 0.4:
+        return "no fit"
+
 
 def generate_job_analysis(job_requirements, resume_data, fit_score):
     """Generate analysis of job match with detailed fit score breakdown"""
@@ -220,13 +214,18 @@ def generate_job_analysis(job_requirements, resume_data, fit_score):
     
     return analysis
 
+
 def extract_text_from_pdf(pdf_file):
     """Extract text from uploaded PDF file"""
     try:
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text() + "\n"
-        return text.strip()
+        f=fitz.open(r"C:\ML\CV-Parsing\Data\test\Alice Clark CV.pdf")
+        text = " "
+        for page in f:
+            text = text + str(page.get_text())
+        text = text.strip()
+        text = ' '.join(text.split())
+        return text
     except Exception as e:
         return f"Error extracting text from PDF: {str(e)}"
+
+

@@ -170,7 +170,7 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
                 Job['ExperianceYears'] = Job.get('ExperianceYears', []) + [f"{exp[0]} {exp[1]}"]  
     Job=standardize_data(Job)
     L=standardize_data(L)
-    print(f"Total Match Score: {total_match_score(Job, L)}")
+    """  print(f"Total Match Score: {total_match_score(Job, L)}")
     for key in Job:
         print(f"{key}: {Job[key]}")
 
@@ -180,6 +180,7 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
     for key in L:
         print(f"{key}: {L[key]}")
 
+ """    
     return L, Job
 
 

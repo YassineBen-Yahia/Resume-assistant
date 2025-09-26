@@ -156,6 +156,8 @@
             border-radius: 12px;
             max-width: 85%;
             word-wrap: break-word;
+            white-space: pre-line;
+            line-height: 1.5;
         }
 
         .message.user {
@@ -170,6 +172,26 @@
             color: #1a202c;
             border: 1px solid #e2e8f0;
             border-bottom-left-radius: 4px;
+        }
+
+        .message.assistant strong {
+            color: #4c51bf;
+            font-weight: 600;
+        }
+
+        .fit-score-high {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .fit-score-medium {
+            color: #ea580c;
+            font-weight: bold;
+        }
+
+        .fit-score-low {
+            color: #dc2626;
+            font-weight: bold;
         }
 
         .message-input-container {
@@ -354,7 +376,7 @@
             }
         });
 
-        function handleFile(file) {
+        async function handleFile(file) {
             if (file.type !== 'application/pdf') {
                 addMessage('Please upload a PDF file only.', 'assistant');
                 return;
@@ -365,11 +387,57 @@
             fileSize.textContent = formatFileSize(file.size);
             fileInfo.classList.add('show');
             
-            // Simulate upload progress
+            // Show upload progress
             progressBar.style.display = 'block';
-            simulateUpload();
+            progressFill.style.width = '20%';
             
-            addMessage(`📄 Resume "${file.name}" uploaded successfully! I can now help you analyze it, suggest improvements, or match it with job descriptions.`, 'assistant');
+            addMessage(`📄 Uploading and analyzing "${file.name}"...`, 'assistant');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                progressFill.style.width = '80%';
+
+                const result = await response.json();
+                
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 500);
+
+                if (result.success) {
+                    resumeText = result.text;
+                    
+                    let successMessage = `✅ **Resume Analysis Complete!**\n\n`;
+                    
+                    if (result.summary && result.summary.length > 0) {
+                        result.summary.forEach(item => {
+                            successMessage += `${item}\n`;
+                        });
+                    }
+                    
+                    successMessage += `\n💡 **What's next?**\n`;
+                    successMessage += `• Paste a job description to see your fit score\n`;
+                    successMessage += `• Ask about specific skills or experience\n`;
+                    successMessage += `• Request improvement suggestions`;
+                    
+                    addMessage(successMessage, 'assistant');
+                } else {
+                    addMessage(`❌ Error: ${result.error || 'Unknown error'}\nStatus: ${response.status}\n${result.stack || ''}`, 'assistant');
+                }
+            } catch (error) {
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+                addMessage(`❌ Upload failed: ${error.message}`, 'assistant');
+            }
         }
 
         function formatFileSize(bytes) {
@@ -430,7 +498,29 @@
         function addMessage(text, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
-            messageDiv.textContent = text;
+            
+            // Process markdown-like formatting
+            let processedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold text
+                .replace(/• /g, '• ');  // Keep bullet points
+            
+            // Add fit score styling
+            if (processedText.includes('Fit Score:')) {
+                const scoreMatch = processedText.match(/(\d+(?:\.\d+)?)%/);
+                if (scoreMatch) {
+                    const score = parseFloat(scoreMatch[1]);
+                    let scoreClass = 'fit-score-low';
+                    if (score >= 70) scoreClass = 'fit-score-high';
+                    else if (score >= 50) scoreClass = 'fit-score-medium';
+                    
+                    processedText = processedText.replace(
+                        /Fit Score: (\d+(?:\.\d+)?)%/g,
+                        `Fit Score: <span class="${scoreClass}">$1%</span>`
+                    );
+                }
+            }
+            
+            messageDiv.innerHTML = processedText;
             
             // Remove welcome message if it exists
             const welcomeMsg = messages.querySelector('.welcome-message');
@@ -442,27 +532,114 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
+        let resumeData = null;
+        let resumeText = null;
+
         function generateResponse(userMessage) {
             const lowerMessage = userMessage.toLowerCase();
-            let response = '';
+            
+            if (!uploadedFile && !resumeData) {
+                addMessage("Please upload your resume first so I can analyze it and provide personalized insights.", 'assistant');
+                return;
+            }
 
-            if (!uploadedFile) {
-                response = "Please upload your resume first so I can analyze it and provide personalized insights.";
-            } else if (lowerMessage.includes('skills') || lowerMessage.includes('skill')) {
-                response = "I can see you're asking about skills! Based on your uploaded resume, I would analyze your technical and soft skills, suggest improvements, and identify any gaps for your target roles. Would you like me to focus on any specific skill area?";
+            // Check if user is pasting a job description
+            if (userMessage.length > 200 && (lowerMessage.includes('job') || lowerMessage.includes('position') || lowerMessage.includes('role') || lowerMessage.includes('requirements') || lowerMessage.includes('responsibilities'))) {
+                analyzeJobMatch(userMessage);
+                return;
+            }
+
+            // Handle other queries
+            let response = '';
+            if (lowerMessage.includes('skills') || lowerMessage.includes('skill')) {
+                if (resumeData && resumeData.Skills) {
+                    response = `Based on your resume, I found ${resumeData.Skills.length} skills: ${resumeData.Skills.slice(0, 10).join(', ')}${resumeData.Skills.length > 10 ? '...' : ''}. Would you like suggestions to improve your skills section?`;
+                } else {
+                    response = "I can analyze your technical and soft skills. Upload your resume and I'll provide detailed insights!";
+                }
             } else if (lowerMessage.includes('improve') || lowerMessage.includes('suggestion')) {
-                response = "Great question! I can help improve your resume by analyzing formatting, content structure, keyword optimization, and overall presentation. I'll also suggest ways to better highlight your achievements and quantify your impact.";
+                response = "I can help improve your resume! Try pasting a job description here, and I'll analyze how well your background matches and suggest specific improvements.";
             } else if (lowerMessage.includes('job') || lowerMessage.includes('match') || lowerMessage.includes('position')) {
-                response = "Perfect! I can help match your resume with job descriptions. Just paste a job posting here, and I'll analyze how well your background aligns with the requirements and suggest areas for improvement.";
+                response = "Perfect! Paste a job description or job posting here, and I'll calculate your fit score and provide detailed analysis of how well you match the requirements.";
             } else if (lowerMessage.includes('experience') || lowerMessage.includes('work')) {
-                response = "I can analyze your work experience section to ensure it effectively showcases your achievements, uses strong action verbs, and quantifies your impact. Would you like suggestions for better describing your accomplishments?";
-            } else if (lowerMessage.includes('format') || lowerMessage.includes('design')) {
-                response = "I can provide feedback on your resume's formatting, layout, and visual presentation to ensure it's ATS-friendly and visually appealing to recruiters. Modern, clean formatting can make a big difference!";
+                if (resumeData && resumeData.ExperianceYears) {
+                    response = `I see you have ${resumeData.ExperianceYears[0]} of experience. I can help you better showcase your achievements and quantify your impact. What specific aspect would you like to improve?`;
+                } else {
+                    response = "I can analyze your work experience section. Upload your resume first for personalized suggestions!";
+                }
             } else {
-                response = "I'm here to help with your resume! I can analyze your skills, suggest improvements, match you with job descriptions, review formatting, and provide personalized career advice. What specific aspect would you like to focus on?";
+                response = "I'm your AI resume assistant! I can:\n• 📊 Calculate job fit scores\n• 🔍 Analyze your skills and experience\n• 💡 Suggest improvements\n• 🎯 Match you with job descriptions\n\nTry pasting a job description to see how well you match!";
             }
 
             addMessage(response, 'assistant');
+        }
+
+            
+
+        async function analyzeJobMatch(jobDescription) {
+            
+
+            addMessage("🔄 Analyzing job match... This may take a moment.", 'assistant');
+
+            try {
+                const response = await fetch('/analyze_job_and_resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job_description: jobDescription,
+                        resume_data: resumeText,
+                        
+                    })
+                });
+
+                const result = await response.json();
+                resumeData = result.resume_data;
+                
+                
+                if (result.success) {
+                    displayJobAnalysis(result);
+                } else {
+                    addMessage(`❌ Error ici: ${result.error || 'Unknown error'}\nStatus: ${response.status}\n${result.stack || ''}`, 'assistant');
+                }
+            } catch (error) {
+                addMessage(`❌ Network error : ${error.message} ${error.stack || ''}`, 'assistant');
+            }
+        }
+
+        function displayJobAnalysis(result) {
+            const fit_score = result.fit_score;
+            const analysis = result.analysis;
+            
+            // Create fit score display
+            let fitDisplay = `🎯 **JOB MATCH ANALYSIS**\n\n`;
+            fitDisplay += `📊 **Fit Score: ${fit_score}% **\n\n`;
+            
+            if (analysis.strengths && analysis.strengths.length > 0) {
+                fitDisplay += `**💪 Your Strengths:**\n`;
+                analysis.strengths.forEach(strength => {
+                    fitDisplay += `• ${strength}\n`;
+                });
+                fitDisplay += `\n`;
+            }
+            
+            if (analysis.gaps && analysis.gaps.length > 0) {
+                fitDisplay += `**⚠️ Areas for Improvement:**\n`;
+                analysis.gaps.forEach(gap => {
+                    fitDisplay += `• ${gap}\n`;
+                });
+                fitDisplay += `\n`;
+            }
+            
+            if (analysis.recommendations && analysis.recommendations.length > 0) {
+                fitDisplay += `**🚀 Recommendations:**\n`;
+                analysis.recommendations.forEach(rec => {
+                    fitDisplay += `• ${rec}\n`;
+                });
+            }
+
+            addMessage(fitDisplay, 'assistant');
         }
 
         // Initialize
