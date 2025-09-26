@@ -158,7 +158,7 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
 
     if 'EDUCATION' in J:
         for skill in J['EDUCATION']:
-            if skill not in Job['Degree']:
+            if 'Degree' in Job and skill not in Job['Degree']:
                 if skill[0]=='▁':
                     skill=skill[1:]
                 Job['Degree'] = Job.get('Degree', []) + [skill]

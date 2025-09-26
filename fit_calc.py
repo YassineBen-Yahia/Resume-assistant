@@ -16,6 +16,7 @@ degree_map = {
     r"\bAssoc\.?\b": "Associate Degree",
     r"\bAI\b": "Artificial Intelligence",
     r"\bML\b": "Machine Learning",
+    r"\bNLP\b": "Natural Language Processing",
     r"\bCS\b": "Computer Science",
     r"\bE\.?E\.?\b": "Electrical Engineering",
     r"\bComp\.?Sci\.?\b": "Computer Science",
