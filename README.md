@@ -174,11 +174,11 @@ def total_match_score(job, candidate):
 
 <div align="center">
 
-| Upload & Analysis | Job Matching |
+| Fit Score Results | Fit Score Results |
 |:---:|:---:|
 | ![Upload Interface](assets/1.png) | ![Job Analysis](assets/2.png) |
 
-| Fit Score Results | Detailed Insights |
+| Skills extraction | Recommendations |
 |:---:|:---:|
 | ![Fit Score Display](assets/3.png) | ![Analysis Results](assets/4.png) |
 
