@@ -31,11 +31,24 @@ An intelligent web application that analyzes resumes, extracts key information u
 - **Data Standardization**: Consistent formatting and deduplication
 - **Experience Calculation**: Automatic total experience computation
 
+
+### AI Models Used
+
+1. **Custom spaCy Model** [Check the github repository](https://github.com/YassineBen-Yahia/CV-parsing)
+   - Trained specifically for resume entity extraction
+   - Identifies: Names, Skills, Education, Designations
+
+2. **Hugging Face Models**
+   - `manishiitg/resume-ner`: [Resume-specific NER](https://huggingface.co/manishiitg/resume-ner)
+   - `Shrav20/job-ner-deberta`: [Job description NER](https://huggingface.co/Shrav20/job-ner-deberta)
+
+3. **Matching Algorithm**
+   - TF-IDF vectorization for semantic similarity
+   - Weighted scoring system (Skills 50%, Education 25%, Experience 25%)
+   - Cosine similarity for skill matching
+
 ##  Quick Start
 
-### Prerequisites
-- Python 3.8+
-- pip package manager
 
 ### Installation
 
@@ -91,7 +104,7 @@ An intelligent web application that analyzes resumes, extracts key information u
 ```
 ├── app_flask.py          # Main Flask web application
 ├── fit_calc.py           # Job matching algorithms & scoring
-├── utils.py              # Data processing & standardization
+├── utils.py              # Data procesing and advice generation
 ├── Process_data.py       # NER entity extraction pipeline
 ├── templates/
 │   └── index.html        # Modern responsive frontend
@@ -99,48 +112,20 @@ An intelligent web application that analyzes resumes, extracts key information u
 └── assets/               # Screenshots and documentation
 ```
 
-### AI Models Used
 
-1. **Custom spaCy Model** [Check the github repository](https://github.com/YassineBen-Yahia/CV-parsing)
-   - Trained specifically for resume entity extraction
-   - Identifies: Names, Skills, Education, Designations
-
-2. **Hugging Face Models**
-   - `manishiitg/resume-ner`: [Resume-specific NER](https://huggingface.co/manishiitg/resume-ner)
-   - `Shrav20/job-ner-deberta`: [Job description NER](https://huggingface.co/Shrav20/job-ner-deberta)
-
-3. **Matching Algorithm**
-   - TF-IDF vectorization for semantic similarity
-   - Weighted scoring system (Skills 50%, Education 25%, Experience 25%)
-   - Cosine similarity for skill matching
-
-## 🔬 Technical Details
+##  Technical Details
 
 ### Entity Extraction
 The system extracts the following entities:
 
 **From Resumes:**
--  **Personal Info**: Names, contact details, email addresses
--  **Skills**: Technical and soft skills with regex patterns
--  **Experience**: Years of experience and job roles
--  **Education**: Degrees, certifications, institutions
--  **Designations**: Current and past job titles
+-  **Personal Info - Skills - Experience - Degree - Designation**
 
 **From Job Descriptions:**
 -  **Requirements**: Required skills 
 -  **Education**: Degree requirements and preferences
 -  **Experience**: Required years of experience
 
-### Scoring Algorithm
-
-```python
-def total_match_score(job, candidate):
-    skill_score = skill_match_score(job_skills, candidate_skills)      # 50%
-    degree_score = degree_match_score(job_degrees, candidate_degrees)  # 25%
-    experience_score = experience_match_score(job_exp, candidate_exp)  # 25%
-    
-    return (0.5 * skill_score) + (0.25 * degree_score) + (0.25 * experience_score)
-```
 
 ##  Features in Detail
 
@@ -148,14 +133,11 @@ def total_match_score(job, candidate):
 - **Skills Matching**: Exact matches + semantic similarity using TF-IDF
 - **Education Matching**: Degree level and field alignment
 - **Experience Matching**: Years of experience comparison with scaling
-- **Comprehensive Analysis**: Detailed breakdown of strengths and gaps
 
 ### Data Processing Pipeline
-1. **PDF Text Extraction**: PyPDF2 for reliable text parsing
-2. **Text Cleaning**: Remove non-ASCII characters, normalize whitespace
-3. **Entity Recognition**: Multi-model NER for comprehensive extraction
-4. **Data Standardization**: Consistent formatting and deduplication
-5. **Score Calculation**: Weighted algorithm for match percentage
+1. **Text Cleaning**: Remove non-ASCII characters, normalize whitespace
+2. **Entity Recognition**: Multi-model NER for comprehensive extraction
+3. **Score Calculation**: Weighted algorithm for match percentage
 
 
 ##  Future Enhancements
