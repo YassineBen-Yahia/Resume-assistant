@@ -1,5 +1,8 @@
 import re
 import random
+import PyPDF2
+from fit_calc import total_match_score
+
 def standardize_data(parsed_data: dict) -> dict:
     def clean_text(text):
         text = text.strip()
@@ -135,3 +138,102 @@ def experience_advice(job_experience, candidate_experience):
         advice = f"You are {diff} years short of the required experience. Consider gaining more experience through relevant roles, projects, or further education."
         advice += " Highlight any transferable skills or related experiences you have that may compensate for the gap."
         return advice
+    
+
+def generate_resume_summary(entities):
+    """Generate a summary of the extracted resume information"""
+    summary = []
+    
+    if 'Name' in entities:
+        summary.append(f"👤 Name: {', '.join(entities['Name'][:2])}")
+    
+    if 'Skills' in entities:
+        skill_count = len(entities['Skills'])
+        summary.append(f"🛠️ Skills: {skill_count} identified")
+    
+    if 'ExperianceYears' in entities:
+        summary.append(f"📅 Experience: {entities['ExperianceYears'][0] if entities['ExperianceYears'] else 'Not specified'}")
+    
+    if 'Degree' in entities:
+        summary.append(f"🎓 Education: {len(entities['Degree'])} qualification(s)")
+    
+    if 'Designation' in entities:
+        summary.append(f"💼 Current Role: {entities['Designation'][0] if entities['Designation'] else 'Not specified'}")
+    
+    return summary
+
+
+
+
+
+
+
+def generate_job_analysis(job_requirements, resume_data, fit_score):
+    """Generate analysis of job match with detailed fit score breakdown"""
+    analysis = {
+        'fit_percentage': round(fit_score * 100, 1),
+        'fit_grade': total_match_score(fit_score),
+        'strengths': [],
+        'gaps': [],
+        'recommendations': []
+    }
+    
+    # Analyze skills match
+    missing_skills= missing_skills(job_requirements.get('Skills', []), resume_data.get('Skills', []))
+    matched_skills = set(job_requirements.get('Skills', [])).intersection(set(resume_data.get('Skills', [])))
+    
+    if matched_skills:
+        analysis['strengths'].append(f"✅ Matching skills ({len(matched_skills)}): {', '.join(list(matched_skills)[:5])}")
+    
+    if missing_skills:
+        analysis['gaps'].append(f"❌ Missing skills ({len(missing_skills)}): {', '.join(list(missing_skills)[:5])}")
+        analysis['recommendations'].append(f"🎯 Consider learning: {', '.join(list(missing_skills)[:3])}")
+    
+    # Analyze experience
+    job_exp = job_requirements.get('ExperianceYears', ['0 years'])[0]
+    resume_exp = resume_data.get('ExperianceYears', ['0 years'])[0]
+    
+    try:
+        job_years = int(re.search(r'\d+', job_exp).group()) if re.search(r'\d+', job_exp) else 0
+        resume_years = int(re.search(r'\d+', resume_exp).group()) if re.search(r'\d+', resume_exp) else 0
+        
+        if resume_years >= job_years:
+            analysis['strengths'].append(f"✅ Experience requirement met: {resume_years} years (required: {job_years})")
+        else:
+            gap = job_years - resume_years
+            analysis['gaps'].append(f"❌ Experience gap: Need {job_years} years, have {resume_years} years ({gap} year gap)")
+    except:
+        pass
+    
+    # Analyze education
+    job_degrees = set(job_requirements.get('Degree', []))
+    resume_degrees = set(resume_data.get('Degree', []))
+    
+    if job_degrees.intersection(resume_degrees):
+        analysis['strengths'].append("✅ Education requirements met")
+    elif job_degrees:
+        analysis['gaps'].append("❌ Education requirements not fully met")
+        analysis['recommendations'].append("📚 Consider relevant certifications or education")
+    
+    # Generate overall recommendation based on fit score
+    if fit_score >= 0.8:
+        analysis['recommendations'].insert(0, "🎉 Excellent match! You should definitely apply for this position.")
+    elif fit_score >= 0.6:
+        analysis['recommendations'].insert(0, "👍 Good match! Address the gaps mentioned above to strengthen your application.")
+    elif fit_score >= 0.4:
+        analysis['recommendations'].insert(0, "⚠️ Moderate match. Focus on developing missing skills before applying.")
+    else:
+        analysis['recommendations'].insert(0, "📈 Consider gaining more relevant experience and skills before applying.")
+    
+    return analysis
+
+def extract_text_from_pdf(pdf_file):
+    """Extract text from uploaded PDF file"""
+    try:
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+        return text.strip()
+    except Exception as e:
+        return f"Error extracting text from PDF: {str(e)}"
