@@ -218,7 +218,13 @@ def generate_job_analysis(job_requirements, resume_data, fit_score):
 def extract_text_from_pdf(pdf_file):
     """Extract text from uploaded PDF file"""
     try:
-        f=fitz.open(r"C:\ML\CV-Parsing\Data\test\Alice Clark CV.pdf")
+        # You can pass either a file path (str or Path) or a file-like object to fitz.open.
+        # If pdf_file is a path, it works directly.
+        # If pdf_file is a file-like object (e.g., from an upload), use fitz.open(stream=pdf_file.read(), filetype="pdf")
+        if isinstance(pdf_file, (str, Path)):
+            f = fitz.open(pdf_file)
+        else:
+            f = fitz.open(stream=pdf_file.read(), filetype="pdf")
         text = " "
         for page in f:
             text = text + str(page.get_text())

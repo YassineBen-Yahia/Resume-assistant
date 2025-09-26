@@ -1,8 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import os
 from pathlib import Path
-import PyPDF2
-import io
 import spacy
 import re
 import torch
