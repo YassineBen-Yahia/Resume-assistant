@@ -1,7 +1,6 @@
 import re
 import random
 import PyPDF2
-from fit_calc import total_match_score
 
 def standardize_data(parsed_data: dict) -> dict:
     def clean_text(text):
@@ -69,32 +68,7 @@ def sum_experience_years(experience_list):
             total += int(parts[0])
     return total
 
-degree_map = {
-    r"\bB\.?S\.?\b": "Bachelor's'",
-    r"\bB\.?Sc\.?\b": "Bachelor's'",
-    r"\bB\.?A\.?\b": "Bachelor of Arts",
-    r"\bM\.?S\.?\b": "Master's'",
-    r"\bMSc\b": "Master's'",
-    r"\bM\.?A\.?\b": "Master's'",
-    r"\bMBA\b": "Master of Business Administration",
-    r"\bPh\.?D\.?\b": "Doctor of Philosophy",
-    r"\bDBA\b": "Doctor of Business Administration",
-    r"\bAssoc\.?\b": "Associate Degree",
-    r"\bAI\b": "Artificial Intelligence",
-    r"\bML\b": "Machine Learning",
-    r"\bCS\b": "Computer Science",
-    r"\bE\.?E\.?\b": "Electrical Engineering",
-    r"\bComp\.?Sci\.?\b": "Computer Science",
-    r"\bEng\.?\b": "Engineering",
-    r"\bDL\b": "Deep Learning",
-}
 
-
-def expand_degree_abbreviations(text: str) -> str:
-    new_text = text
-    for pattern, full in degree_map.items():
-        new_text = re.sub(pattern, full, new_text, flags=re.IGNORECASE)
-    return new_text
 
 
 def missing_skills(job_skills, candidate_skills):
@@ -168,26 +142,45 @@ def generate_resume_summary(entities):
 
 
 
+def get_fit_grade(fit_score):
+    """Convert fit score to letter grade"""
+    if fit_score >= 0.9:
+        return "A+"
+    elif fit_score >= 0.8:
+        return "A"
+    elif fit_score >= 0.7:
+        return "B+"
+    elif fit_score >= 0.6:
+        return "B"
+    elif fit_score >= 0.5:
+        return "C+"
+    elif fit_score >= 0.4:
+        return "C"
+    elif fit_score >= 0.3:
+        return "D"
+    else:
+        return "F"
+
 def generate_job_analysis(job_requirements, resume_data, fit_score):
     """Generate analysis of job match with detailed fit score breakdown"""
     analysis = {
         'fit_percentage': round(fit_score * 100, 1),
-        'fit_grade': total_match_score(fit_score),
+        'fit_grade': get_fit_grade(fit_score),
         'strengths': [],
         'gaps': [],
         'recommendations': []
     }
     
     # Analyze skills match
-    missing_skills= missing_skills(job_requirements.get('Skills', []), resume_data.get('Skills', []))
+    missing_skills_list = missing_skills(job_requirements.get('Skills', []), resume_data.get('Skills', []))
     matched_skills = set(job_requirements.get('Skills', [])).intersection(set(resume_data.get('Skills', [])))
     
     if matched_skills:
         analysis['strengths'].append(f"✅ Matching skills ({len(matched_skills)}): {', '.join(list(matched_skills)[:5])}")
     
-    if missing_skills:
-        analysis['gaps'].append(f"❌ Missing skills ({len(missing_skills)}): {', '.join(list(missing_skills)[:5])}")
-        analysis['recommendations'].append(f"🎯 Consider learning: {', '.join(list(missing_skills)[:3])}")
+    if missing_skills_list:
+        analysis['gaps'].append(f"❌ Missing skills ({len(missing_skills_list)}): {', '.join(list(missing_skills_list)[:5])}")
+        analysis['recommendations'].append(f"🎯 Consider learning: {', '.join(list(missing_skills_list)[:3])}")
     
     # Analyze experience
     job_exp = job_requirements.get('ExperianceYears', ['0 years'])[0]
