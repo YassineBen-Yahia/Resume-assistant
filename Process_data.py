@@ -2,7 +2,7 @@
 import re
 import torch
 from fit_calc import total_match_score
-from utils import standardize_data, sum_experience_years
+from utils import standardize_data, skills_mapping
 
 
 
@@ -146,6 +146,18 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
                 if skill[0]=='▁':
                     skill=skill[1:]
                 Job['Skills'] = Job.get('Skills', []) + [skill]
+
+    """
+    print(f"Resume Skills found: {L.get('Skills', [])}")
+    print()
+    print("********************************")
+    print() """
+
+    if 'Skills' in Job:
+        Job['Skills'] = skills_mapping(Job['Skills'])
+    if 'Skills' in L:
+        L['Skills'] = skills_mapping(L['Skills'])
+
     degrees= re.findall(d_pattern, job_text)
 
     for d in degrees:
@@ -170,17 +182,20 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
                 Job['ExperianceYears'] = Job.get('ExperianceYears', []) + [f"{exp[0]} {exp[1]}"]  
     Job=standardize_data(Job)
     L=standardize_data(L)
-    """  print(f"Total Match Score: {total_match_score(Job, L)}")
-    for key in Job:
-        print(f"{key}: {Job[key]}")
 
-    print()
-    print("********************************")
-    print()
-    for key in L:
-        print(f"{key}: {L[key]}")
+    """     
+        print(f"Total Match Score: {total_match_score(Job, L)}")
+        for key in Job:
+            print(f"{key}: {Job[key]}")
 
- """    
+        print()
+        print("********************************")
+        print()
+
+        for key in L:
+            print(f"{key}: {L[key]}")
+    """
+   
     return L, Job
 
 
