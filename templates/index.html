@@ -415,6 +415,7 @@
 
                 if (result.success) {
                     resumeText = result.text;
+
                     
                     let successMessage = `✅ **Resume Analysis Complete!**\n\n`;
                     
@@ -605,10 +606,19 @@
         
         async function analyzeJobMatch(jobDescription) {
             
+            if (!resumeText) {
+                addMessage("❌ Please upload your resume first to calculate job match scores.", 'assistant');
+                return;
+            }
             
             addMessage("🔄 Analyzing job match... This may take a moment.", 'assistant');
             
             try {
+                console.log('Sending request with:', {
+                    job_description: jobDescription,
+                    resume_data: resumeText ? resumeText : 'null'
+                });
+                
                 const response = await fetch('/analyze_job_and_resume', {
                     method: 'POST',
                     headers: {
@@ -620,10 +630,16 @@
                         
                     })
                 });
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const result = await response.json();
                 resumeData = result.resume_data;
                 jobData = result.job_requirements;
+                console.log('Received response:', result);
                 
                 
                 if (result.success) {
@@ -632,8 +648,14 @@
                 } else {
                     addMessage(`❌ Error ici: ${result.error || 'Unknown error'}\nStatus: ${response.status}\n${result.stack || ''}`, 'assistant');
                 }
-            } catch (error) {
-                addMessage(`❌ Network error : ${error.message} ${error.stack || ''}`, 'assistant');
+            } 
+            catch (error) {
+                console.error('Error in analyzeJobMatch:', error);
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    addMessage(`❌ Connection Error: Cannot connect to the server. Please ensure the Flask app is running on http://localhost:5000`, 'assistant');
+                } else {
+                    addMessage(`❌ Network error: ${error.message}`, 'assistant');
+                }
             }
         }
 

@@ -12,6 +12,14 @@ import traceback
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 # Initialize models
 try:
     # Load your custom spaCy model
@@ -34,6 +42,10 @@ job_model = AutoModelForTokenClassification.from_pretrained(job_model_name)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/test', methods=['GET'])
+def test():
+    return jsonify({'success': True, 'message': 'Flask server is running!'})
 
 
 """ 
@@ -210,7 +222,6 @@ def upload_file():
 @app.route('/analyze_job_and_resume', methods=['POST'])
 def analyze_job_and_resume():
     try:
-      
         data = request.json
         job_text = data.get('job_description', '')
         resume_data = data.get('resume_data', {})
@@ -231,13 +242,13 @@ def analyze_job_and_resume():
             fit_score = total_match_score(job_entities, resume_entities)
             print("Fit score calculated:", fit_score)
         
-            return jsonify({
-                'success': True,
-                'job_requirements': job_entities,
-                'resume_data': resume_entities,
-                'fit_score': round(fit_score * 100, 1),  # Convert to percentage
-                'analysis': generate_job_analysis(job_entities, resume_entities, fit_score)
-            })
+        return jsonify({
+            'success': True,
+            'job_requirements': job_entities,
+            'resume_data': resume_entities,
+            'fit_score': round(fit_score * 100, 1),  # Convert to percentage
+            'analysis': generate_job_analysis(job_entities, resume_entities, fit_score)
+        })
         
     except Exception as e:
         print("Error during job and resume analysis:", e.__traceback__)
