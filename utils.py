@@ -265,7 +265,7 @@ def skills_mapping(skills_list):
     """
     Maps skills in skills_list to standardized skills using skills_dict.
     """
-    
+    new_skills_list = []
 
     skills_dict = {
         "python": ["python", "python3","data analysis"],
@@ -279,7 +279,7 @@ def skills_mapping(skills_list):
         "node.js": ["node.js", "nodejs", "node"],
         "django": ["django"],
         "flask": ["flask"],
-        "deep learning": ["deep learning", "dl","PyTorch", "tensorflow", "keras", "neural networks","NLP","natural language processing", "computer vision", "cv", "opencv"],
+        "deep learning": ["deep learning", "dl","PyTorch", "tensorflow", "keras", "neural networks","nlp","natural language processing", "computer vision", "cv", "opencv"],
         "docker": ["docker", "containerization", "containers"],
         "kubernetes": ["kubernetes", "k8s"],
         "machine learning": ["machine learning", "ml"," artificial intelligence", "ai",],
@@ -292,7 +292,7 @@ def skills_mapping(skills_list):
         "time management": ["time management", "time-management"],
         "teamwork": ["teamwork", "team work"],
         "critical thinking": ["critical thinking", "critical-thinking"],
-        "ai": ["artificial intelligence", "ai", "machine learning", "ml", "deep learning", "dl","neural networks","NLP","natural language processing", "computer vision", "cv", "opencv","Pytorch", "tensorflow", "keras"],
+        "ai": ["artificial intelligence", "ai", "machine learning", "ml", "deep learning", "dl","neural networks","nlp","natural language processing", "computer vision", "cv", "opencv","pytorch", "tensorflow", "keras"],
         "nlp": ["natural language processing", "nlp","python","python3","pytorch","tensorflow","keras"],
         "cv": ["computer vision", "cv","python","python3","pytorch","tensorflow","keras","opencv"],
         "data science": ["data science", "data analytics", "data analysis","python","python3","pandas","numpy","matplotlib"],
@@ -310,7 +310,10 @@ def skills_mapping(skills_list):
         skill_lower = skill.lower()
         for standard_skill, variants in skills_dict.items():
             if skill_lower in standard_skill or skill_lower in variants:
-                skills_list+= [standard_skill]
+                new_skills_list+= skills_dict[standard_skill]
+            else:
+                new_skills_list+= [skill]
+                
 
 
-    return skills_list, skills_dict
+    return list(set(new_skills_list))
