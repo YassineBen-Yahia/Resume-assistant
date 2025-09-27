@@ -3,6 +3,24 @@
 An intelligent web application that analyzes resumes, extracts key information using NLP, and calculates job fit scores to help job seekers optimize their applications.
 
 
+
+## AI Models Used
+
+1. **Custom spaCy Model** [Check the github repository](https://github.com/YassineBen-Yahia/CV-parsing)
+   - Trained specifically for resume entity extraction
+   - Identifies: Names, Skills, Education, Designations
+
+2. **Hugging Face Models**
+   - `manishiitg/resume-ner`: [Resume-specific NER](https://huggingface.co/manishiitg/resume-ner)
+   - `Shrav20/job-ner-deberta`: [Job description NER](https://huggingface.co/Shrav20/job-ner-deberta)
+
+3. **Matching Algorithm**
+   - TF-IDF vectorization for semantic similarity
+   - Weighted scoring system (Skills 50%, Education 25%, Experience 25%)
+   - Cosine similarity for skill matching
+
+
+
 ##  Features
 
 ###  **Resume Analysis**
@@ -32,20 +50,7 @@ An intelligent web application that analyzes resumes, extracts key information u
 - **Experience Calculation**: Automatic total experience computation
 
 
-### AI Models Used
 
-1. **Custom spaCy Model** [Check the github repository](https://github.com/YassineBen-Yahia/CV-parsing)
-   - Trained specifically for resume entity extraction
-   - Identifies: Names, Skills, Education, Designations
-
-2. **Hugging Face Models**
-   - `manishiitg/resume-ner`: [Resume-specific NER](https://huggingface.co/manishiitg/resume-ner)
-   - `Shrav20/job-ner-deberta`: [Job description NER](https://huggingface.co/Shrav20/job-ner-deberta)
-
-3. **Matching Algorithm**
-   - TF-IDF vectorization for semantic similarity
-   - Weighted scoring system (Skills 50%, Education 25%, Experience 25%)
-   - Cosine similarity for skill matching
 
 ##  Quick Start
 
@@ -131,13 +136,12 @@ The system extracts the following entities:
 ##  Future Enhancements
 
 ### Potential Improvements
-- [ ] **Mapping related skills**: For exapmle map "Deep Learning" --> "PyTorch" or "Tensorflow"
+- [x] **Mapping related skills**: For example, map "Deep Learning" → "PyTorch" or "TensorFlow"
 - [ ] **Add a LLM layer**: More accurate chatbot
+- [ ] **Export analysis as PDF**: Allow users to download their fit analysis and recommendations
 
 
-## Some Problems
-
-The pipeline I designed doesn't always get an accurate score for example when the skills required are "Python" "Pandas" or "XGBoost experience" but the resume just mentions "Machine learning skills" it gives a low score even with semantic similarities.  
+  
 
 
 
