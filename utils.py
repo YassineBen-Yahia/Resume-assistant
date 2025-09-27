@@ -261,4 +261,56 @@ def extract_text_from_pdf(pdf_file):
     except Exception as e:
         return f"Error extracting text from PDF: {str(e)}"
 
+def skills_mapping(skills_list):
+    """
+    Maps skills in skills_list to standardized skills using skills_dict.
+    """
+    
 
+    skills_dict = {
+        "python": ["python", "python3","data analysis"],
+        "java": ["java"],
+        "c++": ["c++", "cpp"],
+        "javascript": ["javascript", "js"],
+        "sql": ["sql", "mysql", "postgresql", "sqlite", "mongodb"],
+        "html": ["html","web development", "web designing"],
+        "css": ["css","web design", "web designing"],
+        "react": ["react", "reactjs"],
+        "node.js": ["node.js", "nodejs", "node"],
+        "django": ["django"],
+        "flask": ["flask"],
+        "deep learning": ["deep learning", "dl","PyTorch", "tensorflow", "keras", "neural networks","NLP","natural language processing", "computer vision", "cv", "opencv"],
+        "docker": ["docker", "containerization", "containers"],
+        "kubernetes": ["kubernetes", "k8s"],
+        "machine learning": ["machine learning", "ml"," artificial intelligence", "ai",],
+        "data analysis": ["data analysis", "data analytics","matplotlib","pandas","numpy","data science"],
+        "project management": ["project management", "pm"],
+        "agile methodologies": ["agile methodologies", "agile"],
+        "communication": ["communication", "communicating","problem solving", "problem-solving"],
+        "problem solving": ["problem solving", "problem-solving"],
+        "leadership": ["leadership", "leading"],
+        "time management": ["time management", "time-management"],
+        "teamwork": ["teamwork", "team work"],
+        "critical thinking": ["critical thinking", "critical-thinking"],
+        "ai": ["artificial intelligence", "ai", "machine learning", "ml", "deep learning", "dl","neural networks","NLP","natural language processing", "computer vision", "cv", "opencv","Pytorch", "tensorflow", "keras"],
+        "nlp": ["natural language processing", "nlp","python","python3","pytorch","tensorflow","keras"],
+        "cv": ["computer vision", "cv","python","python3","pytorch","tensorflow","keras","opencv"],
+        "data science": ["data science", "data analytics", "data analysis","python","python3","pandas","numpy","matplotlib"],
+        "full stack development": ["full stack development", "full-stack development","web development","web designing","html","css","javascript","js","react","node.js","nodejs","node","django","flask"],
+        "web development": ["web development","web designing","html","css","javascript","js","react","node.js","nodejs","node","django","flask"],
+        "web designing": ["web designing","web development","html","css","javascript","js","react","node.js","nodejs","node","django","flask"], 
+        "data engineering": ["data engineering", "data engineer","sql","mysql","postgresql","sqlite","mongodb","python","python3","pandas","numpy"],
+        "devops": ["devops","docker","kubernetes","k8s","ci/cd","continuous integration","continuous deployment"],
+        "ci/cd": ["ci/cd","continuous integration","continuous deployment","devops","docker","kubernetes","k8s"],
+
+
+
+    }
+    for skill in skills_list:
+        skill_lower = skill.lower()
+        for standard_skill, variants in skills_dict.items():
+            if skill_lower in standard_skill or skill_lower in variants:
+                skills_list+= [standard_skill]
+
+
+    return skills_list, skills_dict
