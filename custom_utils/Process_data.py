@@ -1,8 +1,8 @@
 
 import re
 import torch
-from fit_calc import total_match_score
-from utils import standardize_data, skills_mapping
+from custom_utils.fit_calc import total_match_score
+from custom_utils.utils import standardize_data, skills_mapping
 
 
 
