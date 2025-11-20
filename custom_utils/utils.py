@@ -268,48 +268,171 @@ def skills_mapping(skills_list):
     new_skills_list = []
 
     skills_dict = {
-        "python": ["python", "python3","data analysis"],
-        "java": ["java"],
-        "c++": ["c++", "cpp"],
-        "javascript": ["javascript", "js"],
-        "sql": ["sql", "mysql", "postgresql", "sqlite", "mongodb"],
-        "html": ["html","web development", "web designing"],
-        "css": ["css","web design", "web designing"],
-        "react": ["react", "reactjs"],
-        "node.js": ["node.js", "nodejs", "node"],
-        "django": ["django"],
-        "flask": ["flask"],
-        "deep learning": ["deep learning", "dl","PyTorch", "tensorflow", "keras", "neural networks","nlp","natural language processing", "computer vision", "cv", "opencv"],
-        "docker": ["docker", "containerization", "containers"],
-        "kubernetes": ["kubernetes", "k8s"],
-        "machine learning": ["machine learning", "ml"," artificial intelligence", "ai","xgboost","scikit-learn","sklearn"],
-        "data analysis": ["data analysis", "data analytics","matplotlib","pandas","numpy","data science"],
-        "project management": ["project management", "pm"],
-        "agile methodologies": ["agile methodologies", "agile"],
-        "communication": ["communication", "communicating","problem solving", "problem-solving"],
-        "problem solving": ["problem solving", "problem-solving"],
-        "leadership": ["leadership", "leading"],
-        "time management": ["time management", "time-management"],
-        "teamwork": ["teamwork", "team work"],
-        "critical thinking": ["critical thinking", "critical-thinking"],
-        "ai": ["artificial intelligence", "ai", "machine learning", "ml", "deep learning", "dl","neural networks","nlp","natural language processing", "computer vision", "cv", "opencv","pytorch", "tensorflow", "keras","artificial neural networks"],
-        "nlp": ["natural language processing", "nlp","python","python3","pytorch","tensorflow","keras"],
-        "cv": ["computer vision", "cv","python","python3","pytorch","tensorflow","keras","opencv"],
-        "data science": ["data science", "data analytics", "data analysis","python","python3","pandas","numpy","matplotlib"],
-        "full stack development": ["full stack development", "full-stack development","web development","web designing","html","css","javascript","js","react","node.js","nodejs","node","django","flask"],
-        "web development": ["web development","web designing","html","css","javascript","js","react","node.js","nodejs","node","django","flask"],
-        "web designing": ["web designing","web development","html","css","javascript","js","react","node.js","nodejs","node","django","flask"], 
-        "data engineering": ["data engineering", "data engineer","sql","mysql","postgresql","sqlite","mongodb","python","python3","pandas","numpy"],
-        "devops": ["devops","docker","kubernetes","k8s","ci/cd","continuous integration","continuous deployment"],
-        "ci/cd": ["ci/cd","continuous integration","continuous deployment","devops","docker","kubernetes","k8s"],
+        "python": [
+            "python", "python3", "py", "scripting", "automation",
+            "pandas", "numpy", "matplotlib", "scipy", "seaborn",
+            "jupyter", "notebook"
+        ],
 
+        "java": [
+            "java", "jvm", "spring", "spring boot", "maven", "gradle"
+        ],
 
+        "c++": [
+            "c++", "cpp", "c plus plus", "stl", "boost"
+        ],
 
+        "c": [
+            "c language", "c programming", "ansi c"
+        ],
+
+        "javascript": [
+            "javascript", "js", "ecmascript", "es6", "frontend", "web dev"
+        ],
+
+        "typescript": [
+            "typescript", "ts"
+        ],
+
+        "sql": [
+            "sql", "mysql", "postgresql", "postgres", "sqlite", "oracle",
+            "mariadb", "mssql", "dbms", "database design"
+        ],
+
+        "nosql": [
+            "nosql", "mongodb", "cassandra", "redis", "dynamodb"
+        ],
+
+        "html": [
+            "html", "html5", "markup"
+        ],
+
+        "css": [
+            "css", "css3", "tailwind", "bootstrap", "responsive design"
+        ],
+
+        "react": [
+            "react", "reactjs", "react.js", "vite", "redux"
+        ],
+
+        "node.js": [
+            "node.js", "nodejs", "node", "express", "express.js"
+        ],
+
+        "django": [
+            "django", "django rest framework", "drf"
+        ],
+
+        "flask": [
+            "flask", "jinja", "werkzeug"
+        ],
+
+        "deep learning": [
+            "deep learning", "dl", "neural networks", "ann", "cnn", "rnn",
+            "lstm", "transformers", "pytorch", "tensorflow", "keras",
+            "vision models", "nlp models"
+        ],
+
+        "machine learning": [
+            "machine learning", "ml", "ai", "artificial intelligence",
+            "sklearn", "xgboost", "catboost", "random forest",
+            "model training", "feature engineering"
+        ],
+
+        "nlp": [
+            "natural language processing", "nlp", "text mining", "transformers",
+            "bert", "gpt", "tokenization", "spaCy", "huggingface"
+        ],
+
+        "cv": [
+            "computer vision", "cv", "image processing", "opencv",
+            "yolo", "cnn", "object detection"
+        ],
+
+        "data science": [
+            "data science", "data analysis", "data analytics",
+            "pandas", "numpy", "matplotlib", "seaborn", "eda", 
+            "data visualization", "statistics"
+        ],
+
+        "data engineering": [
+            "data engineering", "etl", "elt", "airflow", "big data",
+            "spark", "hadoop", "data pipelines", "data warehousing"
+        ],
+
+        "docker": [
+            "docker", "containerization", "containers", "dockerfiles"
+        ],
+
+        "kubernetes": [
+            "kubernetes", "k8s", "pods", "helm", "clusters"
+        ],
+
+        "devops": [
+            "devops", "ci/cd", "continuous integration", "continuous deployment",
+            "jenkins", "gitlab ci", "github actions", "monitoring", "cloud ops"
+        ],
+
+        "cloud": [
+            "cloud", "aws", "azure", "gcp", "cloud computing",
+            "cloud architecture", "cloud services"
+        ],
+
+        "full stack development": [
+            "full stack", "full-stack", "frontend", "backend",
+            "web development", "web dev", "html", "css",
+            "javascript", "react", "node.js", "django", "flask"
+        ],
+
+        "web development": [
+            "web development", "web dev", "frontend", "backend",
+            "responsive design", "html", "css", "javascript", "react",
+            "node", "express", "django", "flask"
+        ],
+
+        "project management": [
+            "project management", "pm", "planning", "roadmapping",
+            "scrum master", "ownership"
+        ],
+
+        "agile methodologies": [
+            "agile", "scrum", "kanban", "agile methodologies"
+        ],
+
+        "communication": [
+            "communication", "communicating", "presentation",
+            "public speaking"
+        ],
+
+        "problem solving": [
+            "problem solving", "problem-solving", "analytical thinking"
+        ],
+
+        "leadership": [
+            "leadership", "team leading", "managing"
+        ],
+
+        "time management": [
+            "time management", "time-management", "organization"
+        ],
+
+        "teamwork": [
+            "teamwork", "team work", "collaboration"
+        ],
+
+        "critical thinking": [
+            "critical thinking", "critical-thinking", "analysis"
+        ]
     }
+
+
+
+
+
     for skill in skills_list:
         skill_lower = skill.lower()
         for standard_skill, variants in skills_dict.items():
-            if skill_lower in standard_skill or skill_lower in variants:
+            if skill_lower in standard_skill :
                 new_skills_list+= skills_dict[standard_skill]
             else:
                 new_skills_list+= [skill]

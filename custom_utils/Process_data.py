@@ -1,12 +1,43 @@
 
 import re
 import torch
+from custom_utils.regex_patterns import EMAIL_PATTERN, SKILLS_PATTERN, EXPERIENCE_PATTERN, DEGREE_PATTERN
 from custom_utils.fit_calc import total_match_score
 from custom_utils.utils import standardize_data, skills_mapping
 
 
+def extract_same_skills(J, labels, tokens, jobtokenize):
+    """Extract entities from job description using Hugging Face NER model
+       Example: ▁management (B-EDUCATION)
+                ▁Java  (B-SKILL)...
+    
+    """
+    
+    j=-1
+    for i, (token, label) in enumerate(zip(tokens, labels)):
+        if(j>i):
+            continue
+        if label != "O":
+            # Start a span with the current token
+            span = token
+            j = i + 1
+            while j < len(labels) and labels[j][2:] == label[2:]:# Check consecutive tokens with the same label
+                span +=" "
+                span += jobtokenize.convert_tokens_to_string([tokens[j]])# Concatenate subsequent tokens with the same label
+                j += 1
+            if label !='DATE':
+                J[label[2:]] = J.get(label[2:], []) + [span]
+    return J
+
+
+
 
 def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_text):
+
+
+    ###############################################################################################
+    # RESUME PROCESSING
+    ###############################################################################################
 
 
     # 1. Preprocess the input text
@@ -66,41 +97,31 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
                 j += 1
 
 
-    #regex patterns to extract email and skills
-    email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-    skills_pattern=r"\b(Python|Java|C\+\+|C#|JavaScript|TypeScript|Go|Rust|Ruby|PHP|Swift|Kotlin|R|MATLAB|SQL|NoSQL|MongoDB|PostgreSQL|MySQL|HTML|CSS|React|Angular|Vue|Django|Flask|Spring|Node\.js|Express|TensorFlow|PyTorch|Keras|Scikit-learn|Pandas|NumPy|Docker|Kubernetes|Git|AWS|Azure|GCP|Linux|Unix|Bash|Shell)\b"
-    experience_pattern=r"(\d+)\s+(years|year)"
-    degree_pattern = r"""
-    \b(
-        # Common abbreviated forms
-        (?:B.S.\s\.?\s?[A-Z][a-zA-Z]*|M\.?\s?[A-Z][a-zA-Z]*|Ph\.?D\.?|MBA|LL\.?B\.?|LL\.?M\.?) |
-        
-        # Bachelor's, Master's, Doctorate, Associate's
-        (?:Bachelor(?:’s|\'s)?\s(?:degree\s)?(?:in\s[\w\s,&/()-]+(?:\s(?:or|and)\s[\w\s,&/()-]+)*)?) |
-        (?:Master(?:’s|\'s)?\s(?:degree\s)?(?:in\s[\w\s,&/()-]+(?:\s(?:or|and)\s[\w\s,&/()-]+)*)?) |
-        (?:Doctor(?:ate| of Philosophy| of [\w\s,&/()-]+)) |
-        (?:Associate(?:’s|\'s)?\s(?:degree\s)?(?:in\s[\w\s,&/()-]+(?:\s(?:or|and)\s[\w\s,&/()-]+)*)?) |
-        
-        # Diploma or Certification programs
-        (?:Diploma\s(?:in\s[\w\s,&/()-]+)?) |
-        (?:Certificate\s(?:in\s[\w\s,&/()-]+)?) |
-        
-        # Generic Degree + field
-        (?:Degree\s(?:in\s[\w\s,&/()-]+)?)
-    )\b
-    """
-    skills = re.findall(skills_pattern, resume_text)
+    
+    skills = re.findall(SKILLS_PATTERN, resume_text)
     #print(f"Skills found: {skills}")
-    emails = re.findall(email_pattern, resume_text)
+    emails = re.findall(EMAIL_PATTERN, resume_text)
     if emails:
         L['Email Address'] = L.get('EMAIL', []) + emails
     if skills:
         L['Skills'] = L.get('Skills', []) + skills   
 
-    d_pattern = re.compile(degree_pattern, re.IGNORECASE | re.VERBOSE) 
+    d_pattern = re.compile(DEGREE_PATTERN, re.IGNORECASE | re.VERBOSE) 
 
     for key in L:
         L[key] = list(set(L[key]))  # Remove duplicates
+
+
+
+
+    print(f"Resume Skills found: {L.get('Skills', [])}")
+    print()
+    print("********************************")
+    print() 
+
+    ###############################################################################################
+    # JOB DESCRIPTION PROCESSING
+    ###############################################################################################
 
     inputs = jobtokenize(
         job_text,
@@ -121,22 +142,14 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
     labels = [ner_job.config.id2label[id_.item()] for id_ in pred_ids]
 
     J={}
+    J=extract_same_skills(J, labels, tokens, jobtokenize)
 
-    j=-1
-    for i, (token, label) in enumerate(zip(tokens, labels)):
-        if(j>i):
-            continue
-        if label != "O":
-            # Start a span with the current token
-            span = token
-            j = i + 1
-            while j < len(labels) and labels[j][2:] == label[2:]:# Check consecutive tokens with the same label
-                span +=" "
-                span += jobtokenize.convert_tokens_to_string([tokens[j]])# Concatenate subsequent tokens with the same label
-                j += 1
-            if label !='DATE':
-                J[label[2:]] = J.get(label[2:], []) + [span]
-    jobskills = re.findall(skills_pattern, job_text)
+
+    jobskills = re.findall(SKILLS_PATTERN, job_text)
+    degrees= re.findall(d_pattern, job_text)
+    experience = re.findall(EXPERIENCE_PATTERN, job_text)
+
+
     Job={}
     if jobskills:
         Job['Skills'] = Job.get('Skills', []) + jobskills
@@ -147,18 +160,13 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
                     skill=skill[1:]
                 Job['Skills'] = Job.get('Skills', []) + [skill]
 
+    
     """
-    print(f"Resume Skills found: {L.get('Skills', [])}")
-    print()
-    print("********************************")
-    print() """
-
     if 'Skills' in Job:
         Job['Skills'] = skills_mapping(Job['Skills'])
     if 'Skills' in L:
         L['Skills'] = skills_mapping(L['Skills'])
-
-    degrees= re.findall(d_pattern, job_text)
+    """
 
     for d in degrees:
         if "degree" in d.lower() or "bachelor" in d.lower() or "master" in d.lower() or "doctor" in d.lower() or "associate" in d.lower() or "diploma" in d.lower() or "certificate" in d.lower():
@@ -175,7 +183,6 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
                     skill=skill[1:]
                 Job['Degree'] = Job.get('Degree', []) + [skill]
 
-    experience = re.findall(experience_pattern, job_text)
     if experience:
         for exp in experience:
             if int(exp[0]) < 50:  # Filter out unrealistic experience values
@@ -183,19 +190,21 @@ def process (nlp, ner_resume,tokenizer, ner_job,jobtokenize, resume_text, job_te
     Job=standardize_data(Job)
     L=standardize_data(L)
 
-    """     
-        print(f"Total Match Score: {total_match_score(Job, L)}")
-        for key in Job:
-            print(f"{key}: {Job[key]}")
+        
+    print(f"Total Match Score: {total_match_score(Job, L)}")
+    for key in Job:
+        print(f"{key}: {Job[key]}")
 
-        print()
-        print("********************************")
-        print()
+    print()
+    print("********************************")
+    print()
 
-        for key in L:
-            print(f"{key}: {L[key]}")
-    """
+    for key in L:
+        print(f"{key}: {L[key]}")
+    
    
     return L, Job
+
+
 
 
