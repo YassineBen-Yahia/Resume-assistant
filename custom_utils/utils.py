@@ -1,7 +1,7 @@
 import re
 import random
 from pathlib import Path
-import PyPDF2
+#import PyPDF2
 import fitz  # PyMuPDF
 
 
