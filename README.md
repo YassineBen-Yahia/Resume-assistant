@@ -137,7 +137,7 @@ The system extracts the following entities:
 
 ### Potential Improvements
 - [x] **Mapping related skills**: For example, map "Deep Learning" → "PyTorch" or "TensorFlow"
-- [ ] **Add a LLM layer**: More accurate chatbot
+- [x] **Add a LLM layer**: More accurate chatbot
 - [ ] **Export analysis as PDF**: Allow users to download their fit analysis and recommendations
 
 

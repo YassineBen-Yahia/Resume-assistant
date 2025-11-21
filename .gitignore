@@ -2,3 +2,5 @@ model-best/
 
 __pycache__/
 
+.env
+resume.pdf
