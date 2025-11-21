@@ -4,9 +4,9 @@ import spacy
 import re
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
-from fit_calc import total_match_score
-from utils import standardize_data, generate_general_advice, generate_job_analysis, extract_text_from_pdf
-from Process_data import process
+from custom_utils.fit_calc import total_match_score 
+from custom_utils.utils import standardize_data, generate_general_advice, generate_job_analysis, extract_text_from_pdf
+from custom_utils.Process_data import process
 import traceback
 
 app = Flask(__name__)

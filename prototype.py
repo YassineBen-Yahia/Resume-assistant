@@ -5,7 +5,7 @@ import torch
 import spacy
 import spacy_transformers  # Explicitly import spacy_transformers
 from pathlib import Path
-from Process_data import process
+from custom_utils.Process_data import process
 
 
 path=Path(r"model-best")
