@@ -206,24 +206,7 @@ def skill_match_score(job_skills, candidate_skills):
 
 ---
 
-
-## 🙏 Acknowledgments
-
-### Technologies
-- **[spaCy](https://spacy.io/)**: Industrial-strength NLP
-- **[Hugging Face](https://huggingface.co/)**: Transformer models
-- **[LangChain](https://langchain.com/)**: LLM application framework
-- **[Groq](https://groq.com/)**: Ultra-fast inference
-- **[Gradio](https://gradio.app/)**: Interactive interfaces
-- **[Flask](https://flask.palletsprojects.com/)**: Web framework
-
-### Models
-- **Custom spaCy Model**: Trained on curated resume dataset
-- **`manishiitg/resume-ner`**: Pre-trained resume NER model
-- **`Shrav20/job-ner-deberta`**: Job description NER model
-
-
-## 📸 Screenshots
+##  Screenshots
 
 <div align="center">
 
@@ -239,4 +222,20 @@ def skill_match_score(job_skills, candidate_skills):
 
 </div>
 
---
+##  Acknowledgments
+
+### Technologies
+- **[spaCy](https://spacy.io/)**: Industrial-strength NLP
+- **[Hugging Face](https://huggingface.co/)**: Transformer models
+- **[LangChain](https://langchain.com/)**: LLM application framework
+- **[Groq](https://groq.com/)**: Ultra-fast inference
+- **[Gradio](https://gradio.app/)**: Interactive interfaces
+- **[Flask](https://flask.palletsprojects.com/)**: Web framework
+
+### Models
+- **Custom spaCy Model**: Trained on curated resume dataset
+- **`manishiitg/resume-ner`**: Pre-trained resume NER model
+- **`Shrav20/job-ner-deberta`**: Job description NER model
+
+
+
