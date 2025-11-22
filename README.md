@@ -114,7 +114,6 @@ jupyter notebook llm_integ.ipynb
  **Groq** (Recommended)
    - Model: Llama 3.1 8B Instant
    - Speed: Ultra-fast inference
-   - Cost: Competitive pricing
 
 
 ##  Matching Algorithm
