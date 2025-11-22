@@ -207,46 +207,6 @@ def skill_match_score(job_skills, candidate_skills):
 ---
 
 
-
-
-## Project Structure
-
-```
-Resume-assistant/
-│
-├── 📁 Custom Utilities
-│   ├── custom_utils/
-│   │   ├── fit_calc.py        # Matching algorithms
-│   │   ├── Process_data.py    # Data processing
-│   │   ├── encoding_similarity.py # Semantic similarity engine
-│   │   ├── gradio_utils.py    # UI utilities
-│   │   ├── tools.py           # LangChain tools
-│   │   ├── utils.py           # Helper functions
-│   │   └── regex_patterns.py  # Text patterns
-│
-├── 📁 Models & Data
-│   ├── model-best/            # Custom spaCy NER model
-│   ├── uploads/               # File upload directory
-│   └── temp/                  # Temporary processing
-│
-├── 📁 Interface Templates
-│   ├── templates/             # HTML templates
-│   └── assets/               # Screenshots & docs
-│
-├── 📁 Configuration
-│   ├── requirements.txt       # Python dependencies
-│   ├── .env.template         # Environment variables          
-│
-└── 📁 Documentation
-    ├── README.md             # This file
-    ├── llm_integ.ipynb      # Interactive notebook
-    └── notebooks/           # Analysis notebooks
-```
-
-
-
-
-
 ## 🙏 Acknowledgments
 
 ### Technologies
@@ -261,3 +221,22 @@ Resume-assistant/
 - **Custom spaCy Model**: Trained on curated resume dataset
 - **`manishiitg/resume-ner`**: Pre-trained resume NER model
 - **`Shrav20/job-ner-deberta`**: Job description NER model
+
+
+## 📸 Screenshots
+
+<div align="center">
+
+### Application Interface Showcase
+
+| Upload & Processing | Analysis Results |
+|:---:|:---:|
+| ![Resume Upload Interface](assets/1.png) | ![Analysis Dashboard](assets/2.png) |
+
+| Skills Extraction | Job Matching & Recommendations |
+|:---:|:---:|
+| ![Skills Analysis](assets/3.png) | ![Match Results](assets/4.png) |
+
+</div>
+
+--
