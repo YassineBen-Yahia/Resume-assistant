@@ -1,9 +1,6 @@
 from transformers import AutoTokenizer
 from transformers import AutoModelForTokenClassification
-from transformers import AutoModel
-import torch
 import spacy
-import spacy_transformers  # Explicitly import spacy_transformers
 from pathlib import Path
 from custom_utils.Process_data import process
 
