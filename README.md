@@ -153,10 +153,6 @@ The system includes a sophisticated semantic similarity engine that goes beyond 
 1. **Skill Gap Analysis**: Identifies semantically related skills that candidates possess
 2. **Education Matching**: Recognizes equivalent degrees across different naming conventions
 
-
-
-
-
 ### Large Language Models
 
 #### Supported Providers
@@ -164,38 +160,6 @@ The system includes a sophisticated semantic similarity engine that goes beyond 
    - Model: Llama 3.1 8B Instant
    - Speed: Ultra-fast inference
 
-
-##  Matching Algorithm
-
-### Scoring Components
-
-The job matching system uses a weighted approach:
-
-#### 1. Skills Matching (50% weight)
-```python
-def skill_match_score(job_skills, candidate_skills):
-    # Exact matches
-    exact_matches = set(job_skills) & set(candidate_skills)
-    exact_score = len(exact_matches) / len(job_skills)
-    
-    # Semantic similarity (TF-IDF + Cosine)
-    semantic_score = cosine_similarity(
-        tfidf_vectorizer.transform([' '.join(job_skills)]),
-        tfidf_vectorizer.transform([' '.join(candidate_skills)])
-    )
-    
-    return 0.9 * exact_score + 0.1 * semantic_score
-```
-
-#### 2. Education Matching (25% weight)
-- Degree level comparison
-- Field of study alignment
-- Institution ranking (optional)
-
-#### 3. Experience Matching (25% weight)
-- Years of experience
-- Role progression
-- Industry relevance
 
 ### Advanced Features
 
