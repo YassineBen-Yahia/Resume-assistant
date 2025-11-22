@@ -28,7 +28,13 @@ The Resume Assistant is a sophisticated AI platform that revolutionizes how job 
 graph TB
     A[PDF Resume Upload] --> B[Text Extraction Pipeline]
     B --> C[Dual NER Processing]
-    C --> D[Entity Standardization]
+    subgraph "NER Models"
+        C --> J[Custom spaCy Model]
+        C --> K[Hugging Face Models]
+    end
+
+    J --> D[Entity Standardization]
+    K --> D[Entity Standardization]
     D --> E[LLM Agent Analysis]
     E --> F[Job Matching Engine]
     F --> G[Interactive Interface]
@@ -36,11 +42,7 @@ graph TB
     H[Job Description] --> I[Job NER Processing]
     I --> F
     
-    subgraph "NER Models"
-        C --> J[Custom spaCy Model]
-        C --> K[Hugging Face Models]
-    end
-    
+
 ```
 
 ### Technology Stack
@@ -57,7 +59,7 @@ graph TB
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -108,6 +110,53 @@ jupyter notebook llm_integ.ipynb
 - **Job NER**: `Shrav20/job-ner-deberta`
 - **Backup**: Generic NER models for fallback
 
+### Advanced Semantic Similarity (`encoding_similarity.py`)
+
+The system includes a sophisticated semantic similarity engine that goes beyond simple keyword matching using state-of-the-art sentence transformers.
+
+#### Technology Stack
+- **Model**: `sentence-transformers/all-MiniLM-L6-v2`
+- **Framework**: Transformers + PyTorch
+- **Method**: Mean pooling with L2 normalization
+- **Similarity**: Cosine similarity in high-dimensional space
+
+#### Key Features
+
+1. **Dual Comparison Methods**:
+   - **Skill-level**: Individual skill-to-skill comparison matrix
+   - **Document-level**: Entire skill sets as semantic documents
+
+2. **Advanced Text Encoding**:
+   ```python
+   def encode(texts):
+       """Encode texts into high-dimensional embeddings"""
+       # Tokenize with padding and truncation
+       encoded_input = tokenizer(texts, padding=True, truncation=True, return_tensors='pt')
+       
+       # Generate contextual embeddings
+       with torch.no_grad():
+           model_output = model(**encoded_input)
+       
+       # Mean pooling for sentence-level representation
+       embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
+       
+       # L2 normalization for cosine similarity
+       embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+       
+       return embeddings.numpy()
+   ```
+
+
+
+#### Applications in Resume Analysis
+
+1. **Skill Gap Analysis**: Identifies semantically related skills that candidates possess
+2. **Education Matching**: Recognizes equivalent degrees across different naming conventions
+
+
+
+
+
 ### Large Language Models
 
 #### Supported Providers
@@ -157,20 +206,7 @@ def skill_match_score(job_skills, candidate_skills):
 
 ---
 
-## Web Interfaces
 
-### Gradio Notebook (`llm_integ.ipynb`)
-
-```python
-# Features:
-- Jupyter integration
-- Interactive widgets
-- Live model testing
-- Development environment
-- Educational interface
-```
-
----
 
 
 ## Project Structure
@@ -182,6 +218,7 @@ Resume-assistant/
 │   ├── custom_utils/
 │   │   ├── fit_calc.py        # Matching algorithms
 │   │   ├── Process_data.py    # Data processing
+│   │   ├── encoding_similarity.py # Semantic similarity engine
 │   │   ├── gradio_utils.py    # UI utilities
 │   │   ├── tools.py           # LangChain tools
 │   │   ├── utils.py           # Helper functions
