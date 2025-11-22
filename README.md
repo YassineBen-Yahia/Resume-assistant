@@ -1,4 +1,4 @@
-#  Resume Assistant - Advanced AI-Powered CV Analysis Platform
+#  Resume Assistant - Resume–Job Matching System
 
 A comprehensive AI-driven platform for resume analysis, job matching, and career optimization using cutting-edge NLP technologies, LLM agents, and interactive web interfaces.
 
