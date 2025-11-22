@@ -1,3 +1,9 @@
+"""
+Prototype script to test the NER models and spaCy pipeline on sample text data.
+Parse resume and job description text to extract relevant entities.
+"""
+
+
 from transformers import AutoTokenizer
 from transformers import AutoModelForTokenClassification
 import spacy
