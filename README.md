@@ -40,7 +40,7 @@ graph TB
     F --> G[Interactive Interface]
     
     H[Job Description] --> I[Job NER Processing]
-    I --> F
+    I --> E
     
 
 ```
