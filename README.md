@@ -233,7 +233,7 @@ def skill_match_score(job_skills, candidate_skills):
 |:---:|:---:|
 | ![Resume Upload Interface](assets/1.png) | ![Analysis Dashboard](assets/2.png) |
 
-| Skills Extraction | Job Matching & Recommendations |
+| Advices | Layout improvements |
 |:---:|:---:|
 | ![Skills Analysis](assets/3.png) | ![Match Results](assets/4.png) |
 
